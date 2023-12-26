@@ -43,8 +43,17 @@
 
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
 			 ("org" . "https://orgmode.org/elpa/")
-			 ;("elpa" . "https://elpa.gnu.org/packages")
+			 ("elpa" . "https://elpa.gnu.org/packages")
+			 ("gnu" . "http://elpa.gnu.org/packages/")
 			 ))
+
+; (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+
+(add-to-list 'package-archives
+	     '("melpa-stable" . "http://stable.melpa.org/packages/") t)
+
+(add-to-list 'package-archives
+	     '("melpa" . "https://melpa.org/packages/") t)
 
 (package-initialize)
 (unless package-archive-contents
@@ -52,6 +61,7 @@
 
 
 ;; Initialize use-package on non-Linux platforms
+;; Intall use-package if not
 (unless (package-installed-p 'use-package)
    (package-install 'use-package))
 
@@ -205,15 +215,38 @@
 (use-package counsel-projectile
   :config (counsel-projectile-mode))
 
-(add-to-list 'package-archives
-	     '("melpa-stable" . "http://stable.melpa.org/packages/"))
 
-(add-to-list 'package-archives
-	     '("melpa" . "http://melpa.org/packages/"))
+
+(unless (package-installed-p 'spinner)
+  (package-install 'spinner)
+  )
+
 
 (use-package magit
   :custom
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
+
+(use-package lsp-mode
+  :commands lsp
+  :hook
+  (scala-mode . lsp)
+  :config
+  (setq lsp-prefer-flymake nil) ; Prefer using lsp-ui (flycheck) over flymake
+  )
+
+;; Install lsp-ui for additional features
+(use-package lsp-ui
+  :commands lsp-ui-mode)
+
+(unless (package-installed-p 'company-lsp)
+  (package-install 'company-lsp))
+
+;; Install company-lsp for autocompletion
+(use-package company-lsp
+  :commands company-lsp)
+
+
+
 
 ;(use-package evil-magit
 ;  :after magit)
@@ -323,7 +356,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(forge org-plus-contrib evil-magit magit counsel-projectile projectile hydra evil-collection evil general helpful all-the-icons dirvish ivy-rich which-key rainbow-delimiters org-crypt doom-modeline ivy-xref 2bit counsel ivy command-log-mode)))
+   '(company-lsp spinner forge org-plus-contrib evil-magit magit counsel-projectile projectile hydra evil-collection evil general helpful all-the-icons dirvish ivy-rich which-key rainbow-delimiters org-crypt doom-modeline ivy-xref 2bit counsel ivy command-log-mode)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -364,3 +397,7 @@
 (unless (package-installed-p 'dirvish)
   (package-install 'dirvish))
 (dirvish-override-dired-mode)
+
+(defun kill-all-buffers ()
+  (interactive)
+    (kill-matching-buffers ".*" t))
